@@ -1,24 +1,29 @@
 package steps;
 
-import shippings.EnvioADomicilio;
-import shippings.RetiroEnCorreo;
-import shippings.ShippingOption;
+import payments.RiskyUser;
 
-public class SeleccionDeEnvio extends CheckoutStep{
+public class SeleccionDeEnvio extends CheckoutStep {
 
-    public SeleccionDeEnvio(boolean editMode) {
-        setEditMode(editMode);
+    private final RiskyUser riskyUser;
+
+    public SeleccionDeEnvio(CheckoutStep nextStep) {
+        setNextStep(nextStep);
+        this.riskyUser = new RiskyUser();
     }
 
-    public CheckoutStep envioADomicilio() {
-        if (!CheckoutStep.isEditMode()) {
-            return new SeleccionDeMedioDePago();
-        } else {
-            return new Review();
-        }
+    public SeleccionDeEnvio() {
+        this.riskyUser = new RiskyUser();
+    }
+
+    public SeleccionDeMedioDePago envioADomicilio() {
+        return new SeleccionDeMedioDePago(riskyUser);
     }
 
     public CheckoutStep retiroEnCorreo() {
         return new MapaDeSucursales();
+    }
+
+    public CheckoutStep envioADomicilio(Review review) {
+        return review;
     }
 }
