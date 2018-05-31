@@ -1,6 +1,9 @@
 package steps;
 
+import inconsistency.Inconsistencia;
+import payments.Oxxo;
 import payments.RiskyUser;
+import shippings.EnvioADomicilio;
 
 public class SeleccionDeEnvio extends CheckoutStep {
 
@@ -25,5 +28,9 @@ public class SeleccionDeEnvio extends CheckoutStep {
 
     public CheckoutStep envioADomicilio(Review review) {
         return review;
+    }
+
+    public CheckoutStep envio(Oxxo oxxo, EnvioADomicilio envioADomicilio) {
+        return oxxo.pagar(new Review(), new Inconsistencia(), envioADomicilio);
     }
 }

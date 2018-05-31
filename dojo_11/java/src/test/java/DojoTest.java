@@ -1,8 +1,12 @@
+import inconsistency.Inconsistencia;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import payments.Boleto;
 import payments.IAltaDeTarjeta;
+import payments.Oxxo;
 import payments.SecurityCode;
+import shippings.EnvioADomicilio;
 import steps.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -90,5 +94,45 @@ public class DojoTest {
         SecurityCode securityCode = (SecurityCode) modalidadAltaDeTarjeta.escanear();
 
         assertEquals(Review.class, securityCode.goToReview().getClass());
+    }
+
+    @Test
+    public void cuando_EligeEnvioASucursal_SeleccionDeMedioDePago_Review_ModificaPorEnvioADomicilio_SeleccionDeMedioDePagoPorInconsistencia_nextStepIs_Review() {
+        SeleccionDeEnvio seleccionDeEnvio = new SeleccionDeEnvio();
+
+        MapaDeSucursales mapaDeSucursales = (MapaDeSucursales) seleccionDeEnvio.retiroEnCorreo();
+
+        SeleccionDeMedioDePago seleccionDeMedioDePago = (SeleccionDeMedioDePago) mapaDeSucursales.seleccionSucursalMasCercana();
+
+        Review review = seleccionDeMedioDePago.seleccionar(new Oxxo(0, 1000));
+
+        SeleccionDeEnvio modificarEnvio = review.modificarEnvio();
+
+        Inconsistencia inconsistencia = (Inconsistencia) modificarEnvio.envio(new EnvioADomicilio(1300));
+
+        SeleccionDeMedioDePago modificarMedioDePago = inconsistencia.cambiarMedioDePago();
+
+        CheckoutStep nextStep = modificarMedioDePago.seleccionar(new Boleto(0, 1500));
+
+        // Zeplin: https://zpl.io/br1Km7L
+        Assert.assertEquals(Review.class, nextStep.getClass());
+    }
+
+    @Test
+    public void cuando_EligeEnvioASucursal_SeleccionDeMedioDePago_Review_ModificaPorEnvioADomicilio_nextStepIs_Review() {
+        SeleccionDeEnvio seleccionDeEnvio = new SeleccionDeEnvio();
+
+        MapaDeSucursales mapaDeSucursales = (MapaDeSucursales) seleccionDeEnvio.retiroEnCorreo();
+
+        SeleccionDeMedioDePago seleccionDeMedioDePago = mapaDeSucursales.seleccionSucursalMasCercana();
+        Oxxo oxxo = new Oxxo(0, 1000);
+        Review review = seleccionDeMedioDePago.seleccionar(oxxo);
+
+        SeleccionDeEnvio modificarEnvio = review.modificarEnvio();
+
+        CheckoutStep nextStep = modificarEnvio.envio(oxxo, new EnvioADomicilio(5000));
+
+        // Zeplin: https://zpl.io/br1Km7L
+        Assert.assertEquals(Review.class, nextStep.getClass());
     }
 }
